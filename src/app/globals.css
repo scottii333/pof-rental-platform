@@ -123,6 +123,16 @@
   }
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
+  }
+
+  /* hide scrollbar (Firefox) */
+  html {
+    scrollbar-width: none;
+  }
+  /* hide scrollbar (Chrome, Safari, Edge) */
+  html::-webkit-scrollbar {
+    display: none;
   }
   html {
     @apply font-sans;

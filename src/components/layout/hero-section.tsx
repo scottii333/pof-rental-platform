@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
+import BrandMarquee from "./brand-marquee";
+
 const FIELDS = [
   {
     key: "pickupLocation",
@@ -48,7 +50,7 @@ const HeroSection = () => {
   return (
     <>
       {/* hero image */}
-      <div className="relative h-[70dvh] max-h-[70dvh] w-full overflow-hidden">
+      <div className="relative h-[65dvh] max-h-[65dvh] w-full overflow-hidden">
         <Image
           src="/brand-logo/herosec.jpg"
           alt="Easy to Go car rental"
@@ -58,15 +60,17 @@ const HeroSection = () => {
           className="object-cover object-center"
         />
 
+        {/* gradient for legibility */}
+        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
+
         {/* hero text */}
         <div className="relative z-10 mx-auto flex h-full w-full max-w-6xl flex-col justify-end px-4 pb-40 sm:px-6 sm:pb-30">
           <div className="max-w-xl text-white">
-            <h1 className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
-              Your road trip starts here.
+            <h1 className="text-4xl font-bold leading-tight drop-shadow-lg sm:text-5xl lg:text-6xl">
+              Drive the <span className="text-[#b0894f]">extraordinary</span>
             </h1>
-            <p className="mt-3 text-sm text-white/80 sm:text-base">
-              Rent a car in minutes. Free cancellation, no hidden fees, pickup
-              wherever you are.
+            <p className="mt-3 text-sm text-white/85 sm:text-base">
+              Luxury car rental in Dubai. Book in minutes.
             </p>
           </div>
         </div>
@@ -129,6 +133,8 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
+
+      <BrandMarquee />
     </>
   );
 };
