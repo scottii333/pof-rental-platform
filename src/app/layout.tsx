@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { QueryProvider } from "@/lib/query-provider";
 import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
 import { CursorFollower } from "@/components/layout/cursor-follower";
 import { Toaster } from "@/components/ui/toast";
 
@@ -36,11 +38,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         inter.variable,
       )}
     >
-      <body className="min-h-[200dvh] flex flex-col bg-background font-sans">
-        <CursorFollower />
-        <Header />
-        {children}
-        <Toaster />
+      <body className="min-h-dvh flex flex-col bg-background font-sans">
+        <QueryProvider>
+          <CursorFollower />
+          <Header />
+          {children}
+          <Footer />
+          <Toaster />
+        </QueryProvider>
       </body>
     </html>
   );
