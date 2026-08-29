@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { CLOSING_HOUR, OPENING_HOUR, isOperatingDay } from "@/shared/search";
+
 const MONTHS = [
   "January",
   "February",
@@ -18,9 +20,11 @@ const MONTHS = [
 ];
 const MONTHS_SHORT = MONTHS.map((m) => m.slice(0, 3));
 const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
-
-// available time slots: every hour from 8am to 11pm
-const HOURS = Array.from({ length: 16 }, (_, i) => i + 8);
+// bookable time slots within branch opening hours
+const HOURS = Array.from(
+  { length: CLOSING_HOUR - OPENING_HOUR + 1 },
+  (_, i) => i + OPENING_HOUR,
+);
 
 const formatHour = (h: number) => `${String(h).padStart(2, "0")}:00`;
 
@@ -30,21 +34,44 @@ const startOfDay = (d: Date) => {
   return x;
 };
 
+const withHour = (day: Date, hour: number) => {
+  const dt = new Date(day);
+  dt.setHours(hour, 0, 0, 0);
+  return dt;
+};
+
 export const formatDateTime = (date: Date, hour: number) =>
   `${MONTHS_SHORT[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()} · ${formatHour(
-    hour
+    hour,
   )}`;
 
 type Props = {
-  minDate?: Date;
+  /** Earliest selectable moment (day + time). */
+  minDateTime?: Date;
+  /** Latest selectable moment (day + time). */
+  maxDateTime?: Date;
+  /** Currently chosen value — restores the active day/time when reopened. */
+  value?: Date;
   onSelect: (display: string, date: Date) => void;
 };
 
-const DateTimePicker = ({ minDate, onSelect }: Props) => {
-  const min = startOfDay(minDate ?? new Date());
-  const [viewYear, setViewYear] = useState(min.getFullYear());
-  const [viewMonth, setViewMonth] = useState(min.getMonth());
-  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+const DateTimePicker = ({
+  minDateTime,
+  maxDateTime,
+  value,
+  onSelect,
+}: Props) => {
+  const min = minDateTime ?? new Date();
+  const minDay = startOfDay(min);
+  const maxDay = maxDateTime ? startOfDay(maxDateTime) : null;
+
+  const anchor = value ?? min;
+  const [viewYear, setViewYear] = useState(anchor.getFullYear());
+  const [viewMonth, setViewMonth] = useState(anchor.getMonth());
+  const [selectedDay, setSelectedDay] = useState<Date | null>(
+    value ? startOfDay(value) : null,
+  );
+  const selectedHour = value ? value.getHours() : null;
 
   const firstDow = new Date(viewYear, viewMonth, 1).getDay();
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -55,8 +82,12 @@ const DateTimePicker = ({ minDate, onSelect }: Props) => {
     cells.push(new Date(viewYear, viewMonth, d));
 
   const canGoPrev =
-    viewYear > min.getFullYear() ||
-    (viewYear === min.getFullYear() && viewMonth > min.getMonth());
+    viewYear > minDay.getFullYear() ||
+    (viewYear === minDay.getFullYear() && viewMonth > minDay.getMonth());
+  const canGoNext =
+    !maxDay ||
+    viewYear < maxDay.getFullYear() ||
+    (viewYear === maxDay.getFullYear() && viewMonth < maxDay.getMonth());
 
   const shiftMonth = (delta: number) => {
     let m = viewMonth + delta;
@@ -77,6 +108,16 @@ const DateTimePicker = ({ minDate, onSelect }: Props) => {
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate();
 
+  const isDayDisabled = (day: Date) =>
+    day < minDay || (maxDay !== null && day > maxDay) || !isOperatingDay(day);
+
+  const isHourDisabled = (day: Date, hour: number) => {
+    const at = withHour(day, hour);
+    if (at < min) return true;
+    if (maxDateTime && at > maxDateTime) return true;
+    return false;
+  };
+
   return (
     <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
       {/* calendar */}
@@ -96,9 +137,10 @@ const DateTimePicker = ({ minDate, onSelect }: Props) => {
           </span>
           <button
             type="button"
-            onClick={() => shiftMonth(1)}
+            onClick={() => canGoNext && shiftMonth(1)}
+            disabled={!canGoNext}
             aria-label="Next month"
-            className="flex h-7 w-7 items-center justify-center rounded-md text-sm transition-colors hover:bg-black/5"
+            className="flex h-7 w-7 items-center justify-center rounded-md text-sm transition-colors hover:bg-black/5 disabled:opacity-30"
           >
             &#8250;
           </button>
@@ -115,7 +157,7 @@ const DateTimePicker = ({ minDate, onSelect }: Props) => {
           ))}
           {cells.map((day, i) => {
             if (!day) return <span key={`e${i}`} />;
-            const disabled = day < min;
+            const disabled = isDayDisabled(day);
             const selected = selectedDay && isSameDay(day, selectedDay);
             return (
               <button
@@ -144,24 +186,35 @@ const DateTimePicker = ({ minDate, onSelect }: Props) => {
           Select time
         </p>
         <div className="grid max-h-56 grid-cols-3 gap-1 overflow-y-auto pr-1 sm:grid-cols-2">
-          {HOURS.map((h) => (
-            <button
-              key={h}
-              type="button"
-              disabled={!selectedDay}
-              onClick={() =>
-                selectedDay &&
-                onSelect(formatDateTime(selectedDay, h), (() => {
-                  const dt = new Date(selectedDay);
-                  dt.setHours(h, 0, 0, 0);
-                  return dt;
-                })())
-              }
-              className="rounded-md border border-black/10 px-2 py-1.5 text-xs text-black transition-colors hover:border-[#b0894f] hover:bg-black/5 disabled:opacity-40 disabled:hover:border-black/10 disabled:hover:bg-transparent"
-            >
-              {formatHour(h)}
-            </button>
-          ))}
+          {HOURS.map((h) => {
+            const disabled = !selectedDay || isHourDisabled(selectedDay, h);
+            const active =
+              selectedHour === h &&
+              selectedDay !== null &&
+              value !== undefined &&
+              isSameDay(selectedDay, startOfDay(value));
+            return (
+              <button
+                key={h}
+                type="button"
+                disabled={disabled}
+                onClick={() =>
+                  selectedDay &&
+                  onSelect(
+                    formatDateTime(selectedDay, h),
+                    withHour(selectedDay, h),
+                  )
+                }
+                className={`rounded-md border px-2 py-1.5 text-xs transition-colors disabled:opacity-40 disabled:hover:border-black/10 disabled:hover:bg-transparent ${
+                  active
+                    ? "border-[#b0894f] bg-[#b0894f] font-semibold text-white"
+                    : "border-black/10 text-black hover:border-[#b0894f] hover:bg-black/5"
+                }`}
+              >
+                {formatHour(h)}
+              </button>
+            );
+          })}
         </div>
         {!selectedDay && (
           <p className="mt-2 text-[11px] text-muted-foreground">
