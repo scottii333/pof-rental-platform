@@ -67,7 +67,7 @@ const HeroSection = () => {
   return (
     <>
       {/* hero image */}
-      <div className="relative h-[65dvh] max-h-[65dvh] w-full overflow-hidden">
+      <div className="relative h-[70dvh] max-h-[70dvh] w-full overflow-hidden">
         <Image
           src="/brand-logo/herosec.jpg"
           alt="Easy to Go car rental"
@@ -127,9 +127,7 @@ const HeroSection = () => {
                   </span>
                   <span
                     className={`truncate text-sm font-normal ${
-                      values[field.key]
-                        ? "text-black"
-                        : "text-muted-foreground"
+                      values[field.key] ? "text-black" : "text-muted-foreground"
                     }`}
                   >
                     {values[field.key] || field.placeholder}
@@ -146,29 +144,29 @@ const HeroSection = () => {
                   >
                     {field.type === "location" ? (
                       <>
-                      <p className="px-3 pb-2 pt-1 text-xs font-semibold text-muted-foreground">
-                        Select location
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setValues((prev) => ({
-                            ...prev,
-                            [field.key]: LOCATION,
-                          }));
-                          setOpen(null);
-                        }}
-                        className={`flex w-full items-start gap-2 rounded-md px-3 py-2 text-left text-sm text-black transition-colors hover:bg-black/5 ${
-                          values[field.key] === LOCATION
-                            ? "font-semibold underline decoration-[#b0894f] underline-offset-4"
-                            : ""
-                        }`}
-                      >
-                        {LOCATION}
-                      </button>
-                      <p className="px-3 pb-1 pt-2 text-xs text-muted-foreground">
-                        Operating hours: Mon–Sat, 9:00 AM – 6:00 PM
-                      </p>
+                        <p className="px-3 pb-2 pt-1 text-xs font-semibold text-muted-foreground">
+                          Select location
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setValues((prev) => ({
+                              ...prev,
+                              [field.key]: LOCATION,
+                            }));
+                            setOpen(null);
+                          }}
+                          className={`flex w-full items-start gap-2 rounded-md px-3 py-2 text-left text-sm text-black transition-colors hover:bg-black/5 ${
+                            values[field.key] === LOCATION
+                              ? "font-semibold underline decoration-[#b0894f] underline-offset-4"
+                              : ""
+                          }`}
+                        >
+                          {LOCATION}
+                        </button>
+                        <p className="px-3 pb-1 pt-2 text-xs text-muted-foreground">
+                          Operating hours: Mon–Sat, 9:00 AM – 6:00 PM
+                        </p>
                       </>
                     ) : (
                       <DateTimePicker
