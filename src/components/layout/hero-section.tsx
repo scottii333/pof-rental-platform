@@ -4,24 +4,41 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import BrandMarquee from "./brand-marquee";
+import DateTimePicker from "./date-time-picker";
+
+const LOCATION = "Dubai Sheikh Zayed Road (POF Rental)";
 
 const FIELDS = [
   {
     key: "pickupLocation",
     label: "Pickup location",
-    placeholder: "City",
+    placeholder: "Select location",
+    type: "location" as const,
   },
   {
     key: "returnLocation",
     label: "Return location",
-    placeholder: "Same as pickup",
+    placeholder: "Select location",
+    type: "location" as const,
   },
-  { key: "pickupDate", label: "Pickup date", placeholder: "Add date" },
-  { key: "returnDate", label: "Return date", placeholder: "Add date" },
+  {
+    key: "pickupDate",
+    label: "Pickup date",
+    placeholder: "Select a pickup date",
+    type: "date" as const,
+  },
+  {
+    key: "returnDate",
+    label: "Return date",
+    placeholder: "Select a return date",
+    type: "date" as const,
+  },
 ];
 
 const HeroSection = () => {
   const [open, setOpen] = useState<string | null>(null);
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [dates, setDates] = useState<Record<string, Date>>({});
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -108,17 +125,68 @@ const HeroSection = () => {
                   <span className="text-xs font-semibold text-muted-foreground">
                     {field.label}
                   </span>
-                  <span className="truncate text-sm font-normal text-muted-foreground">
-                    {field.placeholder}
+                  <span
+                    className={`truncate text-sm font-normal ${
+                      values[field.key]
+                        ? "text-black"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {values[field.key] || field.placeholder}
                   </span>
                 </button>
 
                 {open === field.key && (
-                  <div className="absolute left-0 top-full z-30 mt-2 w-full min-w-64 rounded-lg border border-black/10 bg-background p-4 shadow-lg">
-                    <p className="text-sm font-semibold">{field.label}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Popover content for {field.label.toLowerCase()}.
-                    </p>
+                  <div
+                    className={`absolute left-0 top-full z-30 mt-2 rounded-lg border border-black/10 bg-background p-3 shadow-lg ${
+                      field.type === "date"
+                        ? "w-full sm:w-md lg:w-120"
+                        : "w-full lg:w-[200%] lg:min-w-[200%]"
+                    }`}
+                  >
+                    {field.type === "location" ? (
+                      <>
+                      <p className="px-3 pb-2 pt-1 text-xs font-semibold text-muted-foreground">
+                        Select location
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setValues((prev) => ({
+                            ...prev,
+                            [field.key]: LOCATION,
+                          }));
+                          setOpen(null);
+                        }}
+                        className={`flex w-full items-start gap-2 rounded-md px-3 py-2 text-left text-sm text-black transition-colors hover:bg-black/5 ${
+                          values[field.key] === LOCATION
+                            ? "font-semibold underline decoration-[#b0894f] underline-offset-4"
+                            : ""
+                        }`}
+                      >
+                        {LOCATION}
+                      </button>
+                      <p className="px-3 pb-1 pt-2 text-xs text-muted-foreground">
+                        Operating hours: Mon–Sat, 9:00 AM – 6:00 PM
+                      </p>
+                      </>
+                    ) : (
+                      <DateTimePicker
+                        minDate={
+                          field.key === "returnDate"
+                            ? dates.pickupDate
+                            : undefined
+                        }
+                        onSelect={(display, date) => {
+                          setValues((prev) => ({
+                            ...prev,
+                            [field.key]: display,
+                          }));
+                          setDates((prev) => ({ ...prev, [field.key]: date }));
+                          setOpen(null);
+                        }}
+                      />
+                    )}
                   </div>
                 )}
               </div>
