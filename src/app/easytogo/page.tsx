@@ -1,15 +1,29 @@
-import React from "react";
-import HeroSection from "@/components/layout/hero-section";
-import CarResult from "@/features/cars/components/car-result";
-import { MOCK_CARS } from "@/features/cars/mock-cars";
+import { Suspense } from "react";
 
-const easytogo = () => {
+import HeroSection from "@/components/layout/hero-section";
+import CarSearchResults from "@/features/cars/components/car-search-results";
+import {
+  listMileageOptions,
+  listPaymentOptions,
+} from "@/server/rental-options/rental-options.service";
+
+const EasyToGoPage = async () => {
+  const [paymentOptions, mileageOptions] = await Promise.all([
+    listPaymentOptions(),
+    listMileageOptions(),
+  ]);
+
   return (
     <main>
-      <HeroSection />
-      <CarResult cars={MOCK_CARS} />
+      <Suspense>
+        <HeroSection />
+        <CarSearchResults
+          paymentOptions={paymentOptions}
+          mileageOptions={mileageOptions}
+        />
+      </Suspense>
     </main>
   );
 };
 
-export default easytogo;
+export default EasyToGoPage;
