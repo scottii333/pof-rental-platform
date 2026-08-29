@@ -54,7 +54,21 @@ const GuestBookingForm = ({
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     setSubmitted(true);
-    if (!parsed.success || pending) return;
+    if (pending) return;
+
+    if (!parsed.success) {
+      const firstError = Object.entries(errors)[0];
+      if (firstError) {
+        const [field, messages] = firstError;
+        toast.add({
+          title: "Validation Error",
+          description: messages?.[0] || `Please check your ${field}`,
+          type: "error",
+        });
+      }
+      return;
+    }
+
     onConfirm(parsed.data);
   };
 
@@ -113,6 +127,7 @@ const GuestBookingForm = ({
             placeholder="Email"
             value={values.email}
             onChange={(event) => set("email", event.target.value)}
+            onPaste={(event) => event.preventDefault()}
           />
           {fieldError("email") && (
             <span className="text-xs text-red-600">{fieldError("email")}</span>
@@ -126,6 +141,7 @@ const GuestBookingForm = ({
             placeholder="Retype Email"
             value={values.retypeEmail}
             onChange={(event) => set("retypeEmail", event.target.value)}
+            onPaste={(event) => event.preventDefault()}
           />
           {fieldError("retypeEmail") && (
             <span className="text-xs text-red-600">
@@ -205,7 +221,7 @@ const GuestBookingForm = ({
 
         <button
           type="submit"
-          disabled={!parsed.success || pending}
+          disabled={pending}
           className="flex h-11 items-center justify-center gap-2 rounded-md bg-[#c9a86a] text-sm font-medium text-white transition-colors hover:bg-[#c9a86a]/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending && <Loader2 className="size-4 animate-spin" />}
