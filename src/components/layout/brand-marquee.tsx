@@ -31,7 +31,7 @@ const MarqueeTrack = ({ ariaHidden = false }: { ariaHidden?: boolean }) => (
 
 const BrandMarquee = () => {
   return (
-    <section className="mt-16 overflow-hidden py-12">
+    <section className=" overflow-hidden py-12">
       <div className="relative mx-auto flex w-full max-w-250 overflow-hidden px-4 mask-[linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
         <MarqueeTrack />
         <MarqueeTrack ariaHidden />
