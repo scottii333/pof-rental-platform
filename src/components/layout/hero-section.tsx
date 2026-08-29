@@ -1,12 +1,23 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 
+import {
+  BRANCH_LOCATION,
+  getMaxReturn,
+  getMinPickup,
+  getMinReturn,
+  searchInputSchema,
+} from "@/shared/search";
+import { toast } from "@/components/ui/toast";
+import { useCarsQuery } from "@/features/cars/cars.queries";
 import BrandMarquee from "./brand-marquee";
-import DateTimePicker from "./date-time-picker";
+import DateTimePicker, { formatDateTime } from "./date-time-picker";
+import { Loader2 } from "lucide-react";
 
-const LOCATION = "Dubai Sheikh Zayed Road (POF Rental)";
+const LOCATION = BRANCH_LOCATION;
 
 const FIELDS = [
   {
@@ -35,11 +46,86 @@ const FIELDS = [
   },
 ];
 
+const hydrateFromParams = (params: URLSearchParams) => {
+  const values: Record<string, string> = {};
+  const dates: Record<string, Date> = {};
+
+  const pickupLocation = params.get("pickupLocation");
+  if (pickupLocation) values.pickupLocation = pickupLocation;
+  const returnLocation = params.get("returnLocation");
+  if (returnLocation) values.returnLocation = returnLocation;
+
+  for (const [param, key] of [
+    ["pickupDateTime", "pickupDate"],
+    ["returnDateTime", "returnDate"],
+  ] as const) {
+    const raw = params.get(param);
+    if (!raw) continue;
+    const date = new Date(raw);
+    if (Number.isNaN(date.getTime())) continue;
+    values[key] = formatDateTime(date, date.getHours());
+    dates[key] = date;
+  }
+
+  return { values, dates };
+};
+
 const HeroSection = () => {
+  const searchParams = useSearchParams();
+
+  const initial = useMemo(
+    () => hydrateFromParams(new URLSearchParams(searchParams)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
   const [open, setOpen] = useState<string | null>(null);
-  const [values, setValues] = useState<Record<string, string>>({});
-  const [dates, setDates] = useState<Record<string, Date>>({});
+  const [values, setValues] = useState(initial.values);
+  const [dates, setDates] = useState(initial.dates);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const canSearch = Boolean(
+    values.pickupLocation &&
+    values.returnLocation &&
+    dates.pickupDate &&
+    dates.returnDate,
+  );
+
+  const activeInput =
+    searchParams.has("pickupDateTime") && searchParams.has("returnDateTime")
+      ? {
+          pickupLocation: searchParams.get("pickupLocation") ?? "",
+          returnLocation: searchParams.get("returnLocation") ?? "",
+          pickupDateTime: searchParams.get("pickupDateTime") ?? "",
+          returnDateTime: searchParams.get("returnDateTime") ?? "",
+        }
+      : null;
+  const { isFetching } = useCarsQuery(activeInput);
+
+  const handleSearch = () => {
+    if (!canSearch) return;
+    const input = {
+      pickupLocation: values.pickupLocation,
+      returnLocation: values.returnLocation,
+      pickupDateTime: dates.pickupDate.toISOString(),
+      returnDateTime: dates.returnDate.toISOString(),
+    };
+    const parsed = searchInputSchema.safeParse(input);
+    if (!parsed.success) {
+      toast.add({
+        title: "Check your dates",
+        description:
+          parsed.error.issues[0]?.message ?? "Those dates aren't available.",
+        type: "warning",
+      });
+      return;
+    }
+
+    window.history.pushState(
+      null,
+      "",
+      `/easytogo?${new URLSearchParams(input).toString()}`,
+    );
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -170,17 +256,36 @@ const HeroSection = () => {
                       </>
                     ) : (
                       <DateTimePicker
-                        minDate={
+                        value={
+                          field.key === "returnDate"
+                            ? dates.returnDate
+                            : dates.pickupDate
+                        }
+                        minDateTime={
                           field.key === "returnDate"
                             ? dates.pickupDate
+                              ? getMinReturn(dates.pickupDate)
+                              : getMinPickup()
+                            : getMinPickup()
+                        }
+                        maxDateTime={
+                          field.key === "returnDate" && dates.pickupDate
+                            ? getMaxReturn(dates.pickupDate)
                             : undefined
                         }
                         onSelect={(display, date) => {
-                          setValues((prev) => ({
-                            ...prev,
-                            [field.key]: display,
-                          }));
-                          setDates((prev) => ({ ...prev, [field.key]: date }));
+                          setValues((prev) => {
+                            const next = { ...prev, [field.key]: display };
+                            if (field.key === "pickupDate")
+                              delete next.returnDate;
+                            return next;
+                          });
+                          setDates((prev) => {
+                            const next = { ...prev, [field.key]: date };
+                            if (field.key === "pickupDate")
+                              delete next.returnDate;
+                            return next;
+                          });
                           setOpen(null);
                         }}
                       />
@@ -192,9 +297,12 @@ const HeroSection = () => {
 
             <button
               type="button"
-              className="rounded-lg bg-[#b0894f] px-8 py-3 text-sm font-bold text-white hover:bg-[#9a763f] sm:col-span-2 lg:col-span-1"
+              onClick={handleSearch}
+              disabled={!canSearch || isFetching}
+              className="flex items-center justify-center gap-2 rounded-lg bg-[#b0894f] px-8 py-3 text-sm font-bold text-white transition-all hover:bg-[#9a763f] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:col-span-2 lg:col-span-1"
             >
-              Search
+              {isFetching && <Loader2 className="size-4 animate-spin" />}
+              {isFetching ? "Searching…" : "Search"}
             </button>
           </div>
         </div>
