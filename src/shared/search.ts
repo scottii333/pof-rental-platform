@@ -10,18 +10,37 @@ const MIN_RENTAL_MS = DAY_MS;
 
 const MAX_RENTAL_WINDOW_MS = 30 * DAY_MS;
 
-/** Branch is open Mon–Sat (Sunday = 0). */
 const OPERATING_DAYS = [1, 2, 3, 4, 5, 6];
 export const OPENING_HOUR = 9;
 export const CLOSING_HOUR = 18;
 
-export const isOperatingDay = (date: Date) =>
-  OPERATING_DAYS.includes(date.getDay());
+const BRANCH_TZ = "Asia/Dubai";
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-const isWithinOperatingHours = (date: Date) =>
-  isOperatingDay(date) &&
-  date.getHours() >= OPENING_HOUR &&
-  date.getHours() <= CLOSING_HOUR;
+const branchHour = (date: Date): number =>
+  Number(
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: BRANCH_TZ,
+      hour: "2-digit",
+      hourCycle: "h23",
+    }).format(date),
+  );
+
+const branchWeekday = (date: Date): number =>
+  WEEKDAYS.indexOf(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: BRANCH_TZ,
+      weekday: "short",
+    }).format(date),
+  );
+
+export const isOperatingDay = (date: Date) =>
+  OPERATING_DAYS.includes(branchWeekday(date));
+
+const isWithinOperatingHours = (date: Date) => {
+  const hour = branchHour(date);
+  return isOperatingDay(date) && hour >= OPENING_HOUR && hour <= CLOSING_HOUR;
+};
 
 const nextHour = (date: Date) => {
   const copy = new Date(date);

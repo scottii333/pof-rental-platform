@@ -109,7 +109,9 @@ const DateTimePicker = ({
     a.getDate() === b.getDate();
 
   const isDayDisabled = (day: Date) =>
-    day < minDay || (maxDay !== null && day > maxDay) || !isOperatingDay(day);
+    day < minDay ||
+    (maxDay !== null && day > maxDay) ||
+    !isOperatingDay(withHour(day, 12));
 
   const isHourDisabled = (day: Date, hour: number) => {
     const at = withHour(day, hour);
