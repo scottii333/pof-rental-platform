@@ -133,13 +133,13 @@ const CarCard = ({ car, paymentOptions, mileageOptions }: CarCardProps) => {
           </span>
         </AlertDialogTrigger>
 
-        <AlertDialogContent className="h-[80%] w-[90%] gap-4 overflow-y-auto p-4 md:h-[60%] md:overflow-y-visible data-[size=default]:max-w-[90vw] data-[size=default]:sm:max-w-lg data-[size=default]:md:max-w-3xl data-[size=default]:lg:max-w-4xl">
+        <AlertDialogContent className="h-[80%] w-[90%] gap-4 overflow-y-auto p-4 md:h-auto md:overflow-y-visible data-[size=default]:max-w-[90vw] data-[size=default]:sm:max-w-lg data-[size=default]:md:max-w-3xl data-[size=default]:lg:max-w-4xl">
           <AlertDialogTitle className="sr-only">
             {car.brand} {car.name}
           </AlertDialogTitle>
           <div className="grid min-h-0 grid-cols-1 gap-4 md:h-full md:grid-cols-2">
             {/* Image View */}
-            <div className="relative h-72 min-h-0 overflow-hidden rounded-lg border border-[#c9a86a]/40 sm:h-80 md:h-full">
+            <div className="relative h-72 min-h-0 overflow-hidden rounded-lg border border-[#c9a86a]/40 sm:h-80 md:min-h-100 ">
               <Image
                 src={car.imageUrl}
                 alt={`${car.brand} ${car.name}`}
