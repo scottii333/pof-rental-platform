@@ -53,12 +53,14 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "2-digit",
   month: "short",
   year: "numeric",
+  timeZone: "Asia/Dubai",
 });
 
 const timeFormatter = new Intl.DateTimeFormat("en-GB", {
   hour: "2-digit",
   minute: "2-digit",
   hour12: false,
+  timeZone: "Asia/Dubai",
 });
 
 export const formatBookingMoment = (date: Date) =>

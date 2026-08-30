@@ -103,11 +103,26 @@ const HeroSection = () => {
 
   const handleSearch = () => {
     if (!canSearch) return;
+
+    const toBranchTimeUTC = (date: Date): string => {
+      const DUBAI_OFFSET_HOURS = 4;
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const day = date.getDate();
+      const hours = date.getHours();
+      const minutes = date.getMinutes();
+
+      const dubiTime = new Date(Date.UTC(year, month, day, hours, minutes, 0, 0));
+      const utcTime = new Date(dubiTime.getTime() - DUBAI_OFFSET_HOURS * 3600000);
+
+      return utcTime.toISOString();
+    };
+
     const input = {
       pickupLocation: values.pickupLocation,
       returnLocation: values.returnLocation,
-      pickupDateTime: dates.pickupDate.toISOString(),
-      returnDateTime: dates.returnDate.toISOString(),
+      pickupDateTime: toBranchTimeUTC(dates.pickupDate),
+      returnDateTime: toBranchTimeUTC(dates.returnDate),
     };
     const parsed = searchInputSchema.safeParse(input);
     if (!parsed.success) {
