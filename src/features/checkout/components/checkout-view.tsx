@@ -1,9 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Check, Repeat2 } from "lucide-react";
 
 import type { Addon } from "@/shared/addon";
 import type { Car } from "@/shared/car";
+import type { BookingConfirmation } from "@/shared/booking";
 import type { GuestBookingInput } from "@/shared/guest-booking";
 import type { ProtectionPackage } from "@/shared/protection-package";
 import type { RentalOption } from "@/shared/rental-options";
@@ -11,6 +14,11 @@ import { getPriceBreakdown } from "@/features/booking/pricing";
 import BackButton from "@/features/booking/components/back-button";
 import PriceDetailsDialog from "@/features/booking/components/price-details-dialog";
 import { toast } from "@/components/ui/toast";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useCreateBookingMutation } from "../checkout.queries";
 import GuestBookingForm from "./guest-booking-form";
 import BookingSummaryPanel from "./booking-summary-panel";
@@ -51,16 +59,15 @@ const CheckoutView = ({
   pickupLocation,
   returnLocation,
 }: CheckoutViewProps) => {
+  const router = useRouter();
   const [priceDetailsOpen, setPriceDetailsOpen] = useState(false);
-  // Bump to remount the form with fresh, empty fields after a booking.
   const [formKey, setFormKey] = useState(0);
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [confirmationData, setConfirmationData] = useState<BookingConfirmation | null>(null);
 
   const mutation = useCreateBookingMutation((confirmation) => {
-    toast.add({
-      title: "Booking confirmed (Mockup)",
-      description: `Reference ${confirmation.reference}. This is a mockup — no email has been sent.`,
-      type: "success",
-    });
+    setConfirmationData(confirmation);
+    setConfirmationOpen(true);
     setFormKey((key) => key + 1);
   });
 
@@ -148,6 +155,58 @@ const CheckoutView = ({
         open={priceDetailsOpen}
         onOpenChange={setPriceDetailsOpen}
       />
+
+      <AlertDialog open={confirmationOpen} onOpenChange={setConfirmationOpen}>
+        <AlertDialogContent className="max-w-sm w-[90%] gap-0 p-4">
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex size-12 items-center justify-center rounded-full bg-[#c9a86a]/10">
+              <Check className="size-6 text-[#c9a86a]" />
+            </div>
+
+            <AlertDialogTitle className="text-center text-lg font-bold">
+              Booking Confirmed!
+            </AlertDialogTitle>
+
+            <div className="w-full space-y-2 text-center">
+              <p className="text-xs text-muted-foreground">Reference number:</p>
+              <div className="rounded bg-[#c9a86a]/10 px-3 py-2">
+                <p className="font-mono text-sm font-bold tracking-wider text-[#c9a86a]">
+                  {confirmationData?.reference}
+                </p>
+              </div>
+
+              <div className="space-y-1 pt-2 text-left text-xs">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Vehicle:</span>
+                  <span className="font-medium">{confirmationData?.car.name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Days:</span>
+                  <span className="font-medium">{confirmationData?.rentalDays}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total:</span>
+                  <span className="font-bold text-[#c9a86a]">
+                    AED {confirmationData?.total}
+                  </span>
+                </div>
+              </div>
+
+              <div className="rounded border border-[#c9a86a]/20 bg-[#c9a86a]/5 px-3 py-2 text-xs text-muted-foreground">
+                This is a mockup
+              </div>
+            </div>
+
+            <button
+              onClick={() => router.push("/easytogo")}
+              className="w-full flex items-center justify-center gap-2 rounded bg-[#c9a86a] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#c9a86a]/90"
+            >
+              <Repeat2 className="size-4" />
+              Book Another Car
+            </button>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
