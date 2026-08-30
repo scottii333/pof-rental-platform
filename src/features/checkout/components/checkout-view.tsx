@@ -57,8 +57,8 @@ const CheckoutView = ({
 
   const mutation = useCreateBookingMutation((confirmation) => {
     toast.add({
-      title: "Booking confirmed",
-      description: `Reference ${confirmation.reference}. A confirmation email has been sent to ${confirmation.email}.`,
+      title: "Booking confirmed (Mockup)",
+      description: `Reference ${confirmation.reference}. This is a mockup — no email has been sent.`,
       type: "success",
     });
     setFormKey((key) => key + 1);
