@@ -1,25 +1,17 @@
 import { NextResponse } from "next/server";
 
 import { getBooking } from "@/server/booking/booking.service";
-import { HttpError } from "@/server/http-error";
+import { toApiError } from "@/server/api";
 
-/** GET /api/bookings/:reference */
 export const GET = async (
   _request: Request,
-  { params }: { params: Promise<{ reference: string }> }
-) => {
-  const { reference } = await params;
-
+  { params }: { params: Promise<{ reference: string }> },
+): Promise<Response> => {
   try {
+    const { reference } = await params;
     const booking = await getBooking(reference);
     return NextResponse.json(booking, { status: 200 });
   } catch (error) {
-    if (error instanceof HttpError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.status }
-      );
-    }
-    return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
+    return toApiError(error);
   }
 };
