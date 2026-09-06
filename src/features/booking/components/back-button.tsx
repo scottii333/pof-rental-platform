@@ -1,18 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { ChevronLeft, Loader2 } from "lucide-react";
 
-const BackButton = () => {
-  const router = useRouter();
-  const [isNavigating, setIsNavigating] = useState(false);
+import { useStepNavigation } from "@/features/booking/hooks/useStepNavigation";
 
-  const goBack = () => {
-    if (isNavigating) return;
-    setIsNavigating(true);
-    setTimeout(() => router.back(), 600);
-  };
+const BackButton = () => {
+  const { isNavigating, goBack } = useStepNavigation();
 
   return (
     <button

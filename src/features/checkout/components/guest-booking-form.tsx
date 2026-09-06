@@ -8,17 +8,11 @@ import {
   type GuestBookingInput,
 } from "@/shared/guest-booking";
 import { toast } from "@/components/ui/toast";
+import { notImplemented } from "@/lib/not-implemented";
 import { Switch } from "@/components/ui/switch";
 import Disclosure from "@/features/booking/components/disclosure";
 import PhoneField from "./phone-field";
 import { fieldClass } from "./field-styles";
-
-const notImplemented = (feature: string) =>
-  toast.add({
-    title: `${feature} coming soon`,
-    description: "This is a mockup. The logic isn't implemented yet.",
-    type: "info",
-  });
 
 type GuestBookingFormProps = {
   minLicenseYears: number;

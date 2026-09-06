@@ -10,7 +10,12 @@ import type { BookingConfirmation } from "@/shared/booking";
 import type { GuestBookingInput } from "@/shared/guest-booking";
 import type { ProtectionPackage } from "@/shared/protection-package";
 import type { RentalOption } from "@/shared/rental-options";
-import { getPriceBreakdown } from "@/features/booking/pricing";
+import {
+  formatAed,
+  getPriceBreakdown,
+  splitAddonCost,
+} from "@/features/booking/pricing";
+import type { FormattedSchedule } from "@/features/booking/booking-details";
 import BackButton from "@/features/booking/components/back-button";
 import PriceDetailsDialog from "@/features/booking/components/price-details-dialog";
 import { toast } from "@/components/ui/toast";
@@ -23,16 +28,9 @@ import { useCreateBookingMutation } from "../checkout.queries";
 import GuestBookingForm from "./guest-booking-form";
 import BookingSummaryPanel from "./booking-summary-panel";
 
-type Schedule = {
-  location: string;
-  pickup: string;
-  return: string;
-  days: number;
-};
-
 type CheckoutViewProps = {
   car: Car;
-  schedule: Schedule;
+  schedule: FormattedSchedule;
   protection: ProtectionPackage | null;
   addons: Addon[];
   payment: RentalOption;
@@ -71,15 +69,10 @@ const CheckoutView = ({
     setFormKey((key) => key + 1);
   });
 
-  const { addonsPerDay, addonsOneTime } = useMemo(() => {
-    let perDay = 0;
-    let oneTime = 0;
-    for (const addon of addons) {
-      if (addon.billing === "per-day") perDay += addon.price;
-      else oneTime += addon.price;
-    }
-    return { addonsPerDay: perDay, addonsOneTime: oneTime };
-  }, [addons]);
+  const { perDay: addonsPerDay, oneTime: addonsOneTime } = useMemo(
+    () => splitAddonCost(addons),
+    [addons],
+  );
 
   const protectionPerDay = protection?.pricePerDay ?? 0;
 
@@ -187,7 +180,7 @@ const CheckoutView = ({
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Total:</span>
                   <span className="font-bold text-[#c9a86a]">
-                    AED {confirmationData?.total}
+                    {confirmationData ? formatAed(confirmationData.total) : ""}
                   </span>
                 </div>
               </div>

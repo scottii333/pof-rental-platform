@@ -11,6 +11,7 @@ import {
   type ProtectionPackageId,
 } from "@/shared/protection-package";
 import { getPriceBreakdown } from "@/features/booking/pricing";
+import { useStepNavigation } from "@/features/booking/hooks/useStepNavigation";
 import BackButton from "@/features/booking/components/back-button";
 import BookingSummaryBar from "@/features/booking/components/booking-summary-bar";
 import PriceDetailsDialog from "@/features/booking/components/price-details-dialog";
@@ -34,8 +35,8 @@ const InsuranceStep = ({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { isNavigating, goTo } = useStepNavigation();
   const [priceDetailsOpen, setPriceDetailsOpen] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
 
   const fallbackId = packages[0].id;
   const parsedParam = idSchema.safeParse(searchParams.get("protection"));
@@ -66,15 +67,11 @@ const InsuranceStep = ({
   );
 
   const goNext = useCallback(() => {
-    if (isNavigating) return;
-    setIsNavigating(true);
     const params = new URLSearchParams(searchParams);
     params.set("car", car.id);
     params.set("protection", selectedId);
-    setTimeout(() => {
-      router.push(`/easytogo/addons?${params.toString()}`);
-    }, 2000);
-  }, [car.id, isNavigating, router, searchParams, selectedId]);
+    goTo(`/easytogo/addons?${params.toString()}`);
+  }, [car.id, goTo, searchParams, selectedId]);
 
   return (
     <div className="mx-auto w-[80%]">

@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   BRANCH_LOCATION,
+  branchWallTimeToISO,
   getMaxReturn,
   getMinPickup,
   getMinReturn,
@@ -13,6 +14,7 @@ import {
 } from "@/shared/search";
 import { toast } from "@/components/ui/toast";
 import { useCarsQuery } from "@/features/cars/cars.queries";
+import { useCarSearchParams } from "@/features/cars/hooks/useCarSearchParams";
 import BrandMarquee from "./brand-marquee";
 import DateTimePicker, { formatDateTime } from "./date-time-picker";
 import { Loader2 } from "lucide-react";
@@ -90,39 +92,17 @@ const HeroSection = () => {
     dates.returnDate,
   );
 
-  const activeInput =
-    searchParams.has("pickupDateTime") && searchParams.has("returnDateTime")
-      ? {
-          pickupLocation: searchParams.get("pickupLocation") ?? "",
-          returnLocation: searchParams.get("returnLocation") ?? "",
-          pickupDateTime: searchParams.get("pickupDateTime") ?? "",
-          returnDateTime: searchParams.get("returnDateTime") ?? "",
-        }
-      : null;
+  const { input: activeInput } = useCarSearchParams();
   const { isFetching } = useCarsQuery(activeInput);
 
   const handleSearch = () => {
     if (!canSearch) return;
 
-    const toBranchTimeUTC = (date: Date): string => {
-      const DUBAI_OFFSET_HOURS = 4;
-      const year = date.getFullYear();
-      const month = date.getMonth();
-      const day = date.getDate();
-      const hours = date.getHours();
-      const minutes = date.getMinutes();
-
-      const dubiTime = new Date(Date.UTC(year, month, day, hours, minutes, 0, 0));
-      const utcTime = new Date(dubiTime.getTime() - DUBAI_OFFSET_HOURS * 3600000);
-
-      return utcTime.toISOString();
-    };
-
     const input = {
       pickupLocation: values.pickupLocation,
       returnLocation: values.returnLocation,
-      pickupDateTime: toBranchTimeUTC(dates.pickupDate),
-      returnDateTime: toBranchTimeUTC(dates.returnDate),
+      pickupDateTime: branchWallTimeToISO(dates.pickupDate),
+      returnDateTime: branchWallTimeToISO(dates.returnDate),
     };
     const parsed = searchInputSchema.safeParse(input);
     if (!parsed.success) {

@@ -4,18 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 
-import { toast } from "@/components/ui/toast";
+import { notImplemented } from "@/lib/not-implemented";
 
 const CONTACT_PHONE = "+971 54 995 7255";
 const CONTACT_EMAIL = "info.rental@pupiloffate.ae";
 const CONTACT_ADDRESS = "Dubai Sheikh Zayed Road, Dubai";
-
-const notImplemented = (feature: string) =>
-  toast.add({
-    title: `${feature} coming soon`,
-    description: "This is a mockup. The logic isn't implemented yet.",
-    type: "info",
-  });
 
 type FooterColumn = {
   title: string;

@@ -5,17 +5,11 @@ import type { Addon } from "@/shared/addon";
 import type { Car } from "@/shared/car";
 import type { ProtectionPackage } from "@/shared/protection-package";
 import { formatAed } from "@/features/booking/pricing";
-
-type Schedule = {
-  location: string;
-  pickup: string;
-  return: string;
-  days: number;
-};
+import type { FormattedSchedule } from "@/features/booking/booking-details";
 
 type BookingSummaryPanelProps = {
   car: Car;
-  schedule: Schedule;
+  schedule: FormattedSchedule;
   protection: ProtectionPackage | null;
   addons: Addon[];
   paymentOption: string;

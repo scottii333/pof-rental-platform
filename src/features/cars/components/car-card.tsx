@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { User, Gauge, Loader2 } from "lucide-react";
 
 import type { Car } from "@/shared/car";
 import type { RentalOption } from "@/shared/rental-options";
-import { getPriceBreakdown } from "@/features/booking/pricing";
+import { formatAed, getPriceBreakdown } from "@/features/booking/pricing";
+import { useStepNavigation } from "@/features/booking/hooks/useStepNavigation";
 import { getRentalDays } from "@/shared/search";
 import PriceDetailsDialog from "@/features/booking/components/price-details-dialog";
 import CarBookingOptions from "./car-booking-options";
@@ -19,13 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { getBrandLogo } from "../brand-logos";
-
-const priceFormatter = new Intl.NumberFormat("en-AE", {
-  style: "currency",
-  currency: "AED",
-  maximumFractionDigits: 0,
-});
+import { getBrandLogo } from "../brands";
 
 type CarCardProps = {
   car: Car;
@@ -34,27 +29,22 @@ type CarCardProps = {
 };
 
 const CarCard = ({ car, paymentOptions, mileageOptions }: CarCardProps) => {
-  const router = useRouter();
   const searchParams = useSearchParams();
+  const { isNavigating, goTo } = useStepNavigation();
   const brandLogo = getBrandLogo(car.brand);
   const [priceDetailsOpen, setPriceDetailsOpen] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
 
   const busy = isNavigating || isCancelling;
 
   const goToInsurance = () => {
     if (busy) return;
-    setIsNavigating(true);
-
-    setTimeout(() => {
-      const params = new URLSearchParams(searchParams);
-      params.set("car", car.id);
-      params.set("payment", paymentOptions[0].id);
-      params.set("mileage", mileageOptions[0].id);
-      router.push(`/easytogo/insurance?${params.toString()}`);
-    }, 2000);
+    const params = new URLSearchParams(searchParams);
+    params.set("car", car.id);
+    params.set("payment", paymentOptions[0].id);
+    params.set("mileage", mileageOptions[0].id);
+    goTo(`/easytogo/insurance?${params.toString()}`);
   };
 
   const cancelBooking = () => {
@@ -127,7 +117,7 @@ const CarCard = ({ car, paymentOptions, mileageOptions }: CarCardProps) => {
               </span>
             </span>
             <span className="text-right text-xl font-bold text-black">
-              {priceFormatter.format(car.pricePerDay)}
+              {formatAed(car.pricePerDay)}
               <span className="text-xs font-normal"> / day</span>
             </span>
           </span>
@@ -171,7 +161,7 @@ const CarCard = ({ car, paymentOptions, mileageOptions }: CarCardProps) => {
                   </span>
                 </span>
                 <span className="text-right text-xl font-bold text-black">
-                  {priceFormatter.format(car.pricePerDay)}
+                  {formatAed(car.pricePerDay)}
                   <span className="text-xs font-normal"> / day</span>
                 </span>
               </span>
@@ -189,7 +179,7 @@ const CarCard = ({ car, paymentOptions, mileageOptions }: CarCardProps) => {
                     Total (Incl. Tax) :
                   </span>
                   <span className="text-2xl font-bold">
-                    {priceFormatter.format(totalInclTax)}
+                    {formatAed(totalInclTax)}
                   </span>
                   <button
                     type="button"

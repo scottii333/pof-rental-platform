@@ -6,14 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, UserRound } from "lucide-react";
 
-import { toast } from "@/components/ui/toast";
-
-const notImplemented = (feature: string) =>
-  toast.add({
-    title: `${feature} coming soon`,
-    description: "This is a mockup. The logic isn't implemented yet.",
-    type: "info",
-  });
+import { notImplemented } from "@/lib/not-implemented";
 
 type NavLink = { label: string; href?: string };
 

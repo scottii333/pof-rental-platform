@@ -65,3 +65,18 @@ const timeFormatter = new Intl.DateTimeFormat("en-GB", {
 
 export const formatBookingMoment = (date: Date) =>
   `${dateFormatter.format(date)}, ${timeFormatter.format(date)}`;
+
+/** A schedule with its dates rendered as branch-local text, for display. */
+export type FormattedSchedule = {
+  location: string;
+  pickup: string;
+  return: string;
+  days: number;
+};
+
+export const formatSchedule = (schedule: BookingSchedule): FormattedSchedule => ({
+  location: schedule.location,
+  pickup: formatBookingMoment(schedule.pickup),
+  return: formatBookingMoment(schedule.return),
+  days: schedule.days,
+});

@@ -5,7 +5,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import type { Addon } from "@/shared/addon";
 import type { Car } from "@/shared/car";
-import { getPriceBreakdown } from "@/features/booking/pricing";
+import { getPriceBreakdown, splitAddonCost } from "@/features/booking/pricing";
+import { useStepNavigation } from "@/features/booking/hooks/useStepNavigation";
 import BackButton from "@/features/booking/components/back-button";
 import BookingSummaryBar from "@/features/booking/components/booking-summary-bar";
 import PriceDetailsDialog from "@/features/booking/components/price-details-dialog";
@@ -33,24 +34,18 @@ const AddonsStep = ({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { isNavigating, goTo } = useStepNavigation();
   const [priceDetailsOpen, setPriceDetailsOpen] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
 
   const selectedIds = useMemo(
     () => parseSelected(searchParams.get("addons"), addons),
     [searchParams, addons]
   );
 
-  const { addonsPerDay, addonsOneTime } = useMemo(() => {
-    let perDay = 0;
-    let oneTime = 0;
-    for (const addon of addons) {
-      if (!selectedIds.has(addon.id)) continue;
-      if (addon.billing === "per-day") perDay += addon.price;
-      else oneTime += addon.price;
-    }
-    return { addonsPerDay: perDay, addonsOneTime: oneTime };
-  }, [addons, selectedIds]);
+  const { perDay: addonsPerDay, oneTime: addonsOneTime } = useMemo(
+    () => splitAddonCost(addons.filter((addon) => selectedIds.has(addon.id))),
+    [addons, selectedIds]
+  );
 
   const { total } = useMemo(
     () =>
@@ -80,14 +75,10 @@ const AddonsStep = ({
   );
 
   const goNext = useCallback(() => {
-    if (isNavigating) return;
-    setIsNavigating(true);
     const params = new URLSearchParams(searchParams);
     params.set("car", car.id);
-    setTimeout(() => {
-      router.push(`/easytogo/checkout?${params.toString()}`);
-    }, 2000);
-  }, [car.id, isNavigating, router, searchParams]);
+    goTo(`/easytogo/checkout?${params.toString()}`);
+  }, [car.id, goTo, searchParams]);
 
   return (
     <div className="mx-auto w-[80%]">

@@ -10,9 +10,11 @@ export const config = {
   },
   loading: {
     minDelay: 2000,
+    backDelay: 600,
   },
   rental: {
     branch: "Dubai Sheikh Zayed Road (POF Rental)",
+    minLicenseYears: 1,
     minDaysMs: 1 * DAY_MS,
     maxDaysMs: 30 * DAY_MS,
     operatingHours: {

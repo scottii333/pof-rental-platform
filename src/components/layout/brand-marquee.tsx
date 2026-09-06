@@ -1,22 +1,13 @@
 import Image from "next/image";
 
-const BRANDS = [
-  { name: "Rolls-Royce", logo: "/car-brand/rolls-royce.svg" },
-  { name: "Bentley", logo: "/car-brand/bentley-logo.svg" },
-  { name: "Ferrari", logo: "/car-brand/ferrari-logo.svg" },
-  { name: "Lamborghini", logo: "/car-brand/lamborghini-logo.svg" },
-  { name: "McLaren", logo: "/car-brand/mclaren-logo.svg" },
-  { name: "Mercedes-Benz", logo: "/car-brand/mercedes-benz.svg" },
-  { name: "Porsche", logo: "/car-brand/porsche-logo.svg" },
-  { name: "BYD", logo: "/car-brand/byd.svg" },
-];
+import { CAR_BRANDS } from "@/features/cars/brands";
 
 const MarqueeTrack = ({ ariaHidden = false }: { ariaHidden?: boolean }) => (
   <div
     aria-hidden={ariaHidden || undefined}
     className="flex shrink-0 animate-[marquee_28s_linear_infinite] items-center gap-16 pr-16"
   >
-    {BRANDS.map((brand) => (
+    {CAR_BRANDS.map((brand) => (
       <Image
         key={brand.name}
         src={brand.logo}

@@ -4,7 +4,7 @@ import {
   type BookingConfirmation,
 } from "@/shared/booking";
 import { getRentalDays, searchInputSchema } from "@/shared/search";
-import { getPriceBreakdown } from "@/features/booking/pricing";
+import { getPriceBreakdown, splitAddonCost } from "@/features/booking/pricing";
 
 import { HttpError, HttpStatus } from "../http-error";
 import { assertDubaiBranch } from "../branch";
@@ -20,14 +20,6 @@ import { createBookingReference } from "./reference";
 
 const invalid = (message: string, details?: unknown): HttpError =>
   new HttpError(HttpStatus.Unprocessable, message, details);
-
-const sumAddons = (
-  addons: Awaited<ReturnType<typeof resolveAddons>>,
-  billing: "per-day" | "one-time",
-): number =>
-  addons
-    .filter((addon) => addon.billing === billing)
-    .reduce((total, addon) => total + addon.price, 0);
 
 /**
  * Validate a checkout submission, price it, persist it, and return the
@@ -62,6 +54,7 @@ export const createBooking = async (
   }
 
   const addons = await resolveAddons(input.addonIds);
+  const addonCost = splitAddonCost(addons);
   const payment = await assertPaymentOption(input.paymentOptionId);
   const mileage = await assertMileageOption(input.mileageOptionId);
 
@@ -73,8 +66,8 @@ export const createBooking = async (
   const { total } = getPriceBreakdown({
     dailyPrice: car.pricePerDay,
     protectionPerDay: protection?.pricePerDay ?? 0,
-    addonsPerDay: sumAddons(addons, "per-day"),
-    addonsOneTime: sumAddons(addons, "one-time"),
+    addonsPerDay: addonCost.perDay,
+    addonsOneTime: addonCost.oneTime,
     rentalDays,
   });
 

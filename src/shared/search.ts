@@ -112,3 +112,20 @@ export const getMaxReturn = (pickup: Date) =>
 
 export const getRentalDays = (pickup: Date, dropoff: Date) =>
   Math.max(1, Math.ceil((dropoff.getTime() - pickup.getTime()) / DAY_MS));
+
+const BRANCH_UTC_OFFSET_HOURS = 4;
+
+export const branchWallTimeToISO = (local: Date): string => {
+  const utcMs =
+    Date.UTC(
+      local.getFullYear(),
+      local.getMonth(),
+      local.getDate(),
+      local.getHours(),
+      local.getMinutes(),
+      0,
+      0,
+    ) -
+    BRANCH_UTC_OFFSET_HOURS * HOUR_MS;
+  return new Date(utcMs).toISOString();
+};
