@@ -1,5 +1,6 @@
+import { config } from "@/config";
+
 export const RENTAL_DAYS = 7;
-const VAT_RATE = 0.05;
 
 export type PriceBreakdown = {
   dailyPrice: number;
@@ -28,7 +29,7 @@ export const getPriceBreakdown = ({
   addonsPerDay = 0,
   addonsOneTime = 0,
   rentalDays = RENTAL_DAYS,
-  vatRate = VAT_RATE,
+  vatRate = config.currency.taxRate,
 }: PriceBreakdownInput): PriceBreakdown => {
   const subtotal =
     (dailyPrice + protectionPerDay + addonsPerDay) * rentalDays + addonsOneTime;
@@ -52,4 +53,4 @@ const amount = new Intl.NumberFormat("en-AE", {
   maximumFractionDigits: 2,
 });
 
-export const formatAed = (value: number) => `${amount.format(value)} AED`;
+export const formatAed = (value: number) => `${amount.format(value)} ${config.currency.symbol}`;
