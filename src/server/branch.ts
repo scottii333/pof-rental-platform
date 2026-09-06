@@ -1,8 +1,8 @@
 import { BRANCH_LOCATION } from "@/shared/search";
 
-import { HttpError } from "./http-error";
+import { HttpError, HttpStatus } from "./http-error";
 
-export const assertBranch = (
+export const assertDubaiBranch = (
   pickupLocation: string,
   returnLocation: string,
 ): void => {
@@ -10,6 +10,9 @@ export const assertBranch = (
     pickupLocation !== BRANCH_LOCATION ||
     returnLocation !== BRANCH_LOCATION
   ) {
-    throw new HttpError(422, "We only operate from the Dubai branch");
+    throw new HttpError(
+      HttpStatus.Unprocessable,
+      "We only operate from the Dubai branch",
+    );
   }
 };

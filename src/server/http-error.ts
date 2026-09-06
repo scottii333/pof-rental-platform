@@ -1,3 +1,15 @@
+export const HttpStatus = {
+  Ok: 200,
+  Created: 201,
+  BadRequest: 400,
+  Unauthorized: 401,
+  Forbidden: 403,
+  NotFound: 404,
+  Conflict: 409,
+  Unprocessable: 422,
+  ServerError: 500,
+} as const;
+
 export class HttpError extends Error {
   constructor(
     readonly status: number,
