@@ -7,7 +7,6 @@ import { withMinLoadingTime } from "@/lib/async";
 
 import { fetchCars } from "./cars.api";
 
-/** Cache keys for everything car-related, built in one place. */
 export const carsKeys = {
   all: ["cars"] as const,
   searches: () => [...carsKeys.all, "search"] as const,
