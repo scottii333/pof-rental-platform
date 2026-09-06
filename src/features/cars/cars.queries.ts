@@ -2,32 +2,28 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import type { SearchInput } from "@/shared/search";
 import { searchInputSchema } from "@/shared/search";
+import { config } from "@/config";
+import { withMinLoadingTime } from "@/lib/async";
 
 import { fetchCars } from "./cars.api";
 
-const MIN_LOADING_MS = 2000;
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
+/** Cache keys for everything car-related, built in one place. */
 export const carsKeys = {
   all: ["cars"] as const,
-  search: (input: SearchInput) => [...carsKeys.all, "search", input] as const,
+  searches: () => [...carsKeys.all, "search"] as const,
+  search: (input: SearchInput) => [...carsKeys.searches(), input] as const,
 };
 
 export const useCarsQuery = (input: Partial<SearchInput> | null) => {
   const parsed = input ? searchInputSchema.safeParse(input) : null;
-  const valid = parsed?.success ? parsed.data : null;
+  const validInput = parsed?.success ? parsed.data : null;
 
   return useQuery({
-    queryKey: valid ? carsKeys.search(valid) : carsKeys.all,
-    queryFn: async () => {
-      const [cars] = await Promise.all([
-        fetchCars(valid as SearchInput),
-        wait(MIN_LOADING_MS),
-      ]);
-      return cars;
-    },
-    enabled: valid !== null,
-    staleTime: 30_000,
+    queryKey: validInput ? carsKeys.search(validInput) : carsKeys.all,
+    queryFn: () =>
+      withMinLoadingTime(fetchCars(validInput!), config.loading.minDelay),
+    enabled: validInput !== null,
+    staleTime: config.cache.staleTime.carSearch,
     placeholderData: keepPreviousData,
   });
 };

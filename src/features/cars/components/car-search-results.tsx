@@ -1,10 +1,9 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
-
 import type { RentalOption } from "@/shared/rental-options";
 
+import { useCarSearchParams } from "../hooks/useCarSearchParams";
 import { useCarsQuery } from "../cars.queries";
 import CarResult from "./car-result";
 import CarResultSkeleton from "./car-result-skeleton";
@@ -24,19 +23,7 @@ const CarSearchResults = ({
   paymentOptions,
   mileageOptions,
 }: CarSearchResultsProps) => {
-  const params = useSearchParams();
-
-  const hasSearch =
-    params.has("pickupDateTime") && params.has("returnDateTime");
-  const input = hasSearch
-    ? {
-        pickupLocation: params.get("pickupLocation") ?? "",
-        returnLocation: params.get("returnLocation") ?? "",
-        pickupDateTime: params.get("pickupDateTime") ?? "",
-        returnDateTime: params.get("returnDateTime") ?? "",
-      }
-    : null;
-
+  const { hasSearch, input } = useCarSearchParams();
   const query = useCarsQuery(input);
 
   if (!hasSearch) {

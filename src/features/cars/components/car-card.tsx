@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { User, Gauge, Loader2 } from "lucide-react";
 
-import { Car } from "@/shared/car";
+import type { Car } from "@/shared/car";
 import type { RentalOption } from "@/shared/rental-options";
 import { getPriceBreakdown } from "@/features/booking/pricing";
 import { getRentalDays } from "@/shared/search";
