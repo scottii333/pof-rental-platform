@@ -102,17 +102,13 @@ export const searchInputSchema = z
 
 export type SearchInput = z.infer<typeof searchInputSchema>;
 
-/** Earliest selectable pickup — the next full hour from now. */
 export const getMinPickup = (now: Date = new Date()) => nextHour(now);
 
-/** Earliest selectable return moment for a given pickup (one day later). */
 export const getMinReturn = (pickup: Date) =>
   new Date(pickup.getTime() + MIN_RENTAL_MS);
 
-/** Latest selectable return moment for a given pickup. */
 export const getMaxReturn = (pickup: Date) =>
   new Date(pickup.getTime() + MAX_RENTAL_WINDOW_MS);
 
-/** Billable days between pickup and return (rounded up, minimum 1). */
 export const getRentalDays = (pickup: Date, dropoff: Date) =>
   Math.max(1, Math.ceil((dropoff.getTime() - pickup.getTime()) / DAY_MS));

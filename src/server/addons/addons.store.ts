@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { Addon } from "@/shared/addon";
+import { clone } from "@/lib/clone";
 
 const ADDONS: Addon[] = [
   {
@@ -49,8 +50,6 @@ const ADDONS: Addon[] = [
       "Baby seat for your child’s safety and comfort during the ride.",
   },
 ];
-
-const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value));
 
 export const addonsStore = {
   async list(): Promise<Addon[]> {

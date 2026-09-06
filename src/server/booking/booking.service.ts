@@ -6,8 +6,8 @@ import {
 import { getRentalDays, searchInputSchema } from "@/shared/search";
 import { getPriceBreakdown } from "@/features/booking/pricing";
 
-import { HttpError } from "../http-error";
-import { assertBranch } from "../branch";
+import { HttpError, HttpStatus } from "../http-error";
+import { assertDubaiBranch } from "../branch";
 import { resolveAddons } from "../addons/addons.service";
 import { getCarOrThrow } from "../cars/cars.service";
 import { getProtectionPackage } from "../insurance/insurance.service";
@@ -16,23 +16,33 @@ import {
   assertPaymentOption,
 } from "../rental-options/rental-options.service";
 import { bookingsStore } from "./booking.store";
+import { createBookingReference } from "./reference";
 
-const reference = () =>
-  `POF-${Date.now().toString(36).toUpperCase()}-${Math.random()
-    .toString(36)
-    .slice(2, 6)
-    .toUpperCase()}`;
+const invalid = (message: string, details?: unknown): HttpError =>
+  new HttpError(HttpStatus.Unprocessable, message, details);
 
+const sumAddons = (
+  addons: Awaited<ReturnType<typeof resolveAddons>>,
+  billing: "per-day" | "one-time",
+): number =>
+  addons
+    .filter((addon) => addon.billing === billing)
+    .reduce((total, addon) => total + addon.price, 0);
+
+/**
+ * Validate a checkout submission, price it, persist it, and return the
+ * confirmation the customer sees.
+ */
 export const createBooking = async (
   raw: unknown,
 ): Promise<BookingConfirmation> => {
   const parsed = createBookingSchema.safeParse(raw);
   if (!parsed.success) {
-    throw new HttpError(422, "Invalid booking details", parsed.error.flatten());
+    throw invalid("Invalid booking details", parsed.error.flatten());
   }
   const input = parsed.data;
 
-  assertBranch(input.pickupLocation, input.returnLocation);
+  assertDubaiBranch(input.pickupLocation, input.returnLocation);
 
   const window = searchInputSchema.safeParse({
     pickupLocation: input.pickupLocation,
@@ -41,41 +51,35 @@ export const createBooking = async (
     returnDateTime: input.returnDateTime,
   });
   if (!window.success) {
-    throw new HttpError(422, "Invalid rental dates", window.error.flatten());
+    throw invalid("Invalid rental dates", window.error.flatten());
   }
 
   const car = await getCarOrThrow(input.carId);
 
   const protection = await getProtectionPackage(input.protectionId);
   if (input.protectionId && !protection) {
-    throw new HttpError(422, "Invalid protection package");
+    throw invalid("Invalid protection package");
   }
 
   const addons = await resolveAddons(input.addonIds);
   const payment = await assertPaymentOption(input.paymentOptionId);
   const mileage = await assertMileageOption(input.mileageOptionId);
 
-  const pickup = new Date(input.pickupDateTime);
-  const dropoff = new Date(input.returnDateTime);
-  const rentalDays = getRentalDays(pickup, dropoff);
-
-  const addonsPerDay = addons
-    .filter((addon) => addon.billing === "per-day")
-    .reduce((sum, addon) => sum + addon.price, 0);
-  const addonsOneTime = addons
-    .filter((addon) => addon.billing === "one-time")
-    .reduce((sum, addon) => sum + addon.price, 0);
+  const rentalDays = getRentalDays(
+    new Date(input.pickupDateTime),
+    new Date(input.returnDateTime),
+  );
 
   const { total } = getPriceBreakdown({
     dailyPrice: car.pricePerDay,
     protectionPerDay: protection?.pricePerDay ?? 0,
-    addonsPerDay,
-    addonsOneTime,
+    addonsPerDay: sumAddons(addons, "per-day"),
+    addonsOneTime: sumAddons(addons, "one-time"),
     rentalDays,
   });
 
   const confirmation = bookingConfirmationSchema.parse({
-    reference: reference(),
+    reference: createBookingReference(),
     email: input.guest.email,
     car,
     pickupLocation: input.pickupLocation,
@@ -104,6 +108,6 @@ export const getBooking = async (
   reference: string,
 ): Promise<BookingConfirmation> => {
   const booking = await bookingsStore.findByReference(reference);
-  if (!booking) throw new HttpError(404, "Booking not found");
+  if (!booking) throw new HttpError(HttpStatus.NotFound, "Booking not found");
   return bookingConfirmationSchema.parse(booking);
 };

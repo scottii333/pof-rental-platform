@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { Car } from "@/shared/car";
+import { clone } from "@/lib/clone";
 
 const CARS: Car[] = [
   {
@@ -100,8 +101,6 @@ const CARS: Car[] = [
     available: true,
   },
 ];
-
-const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value));
 
 export const carsStore = {
   async list(): Promise<Car[]> {

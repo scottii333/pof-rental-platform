@@ -19,9 +19,6 @@ export const bookingsStore = {
     bookings.push(booking);
     return booking;
   },
-  async list(): Promise<StoredBooking[]> {
-    return [...bookings];
-  },
   async findByReference(reference: string): Promise<StoredBooking | null> {
     return bookings.find((entry) => entry.reference === reference) ?? null;
   },

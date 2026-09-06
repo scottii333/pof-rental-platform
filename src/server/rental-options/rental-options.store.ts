@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { RentalOption } from "@/shared/rental-options";
+import { clone } from "@/lib/clone";
 
 const PAYMENT: RentalOption[] = [
   {
@@ -20,8 +21,6 @@ const MILEAGE: RentalOption[] = [
     badge: "Included",
   },
 ];
-
-const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value));
 
 export const rentalOptionsStore = {
   async listPayment(): Promise<RentalOption[]> {

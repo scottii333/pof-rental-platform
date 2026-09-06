@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { ProtectionPackage } from "@/shared/protection-package";
+import { clone } from "@/lib/clone";
 
 const PACKAGES: ProtectionPackage[] = [
   {
@@ -47,8 +48,6 @@ const PACKAGES: ProtectionPackage[] = [
     ],
   },
 ];
-
-const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value));
 
 export const insuranceStore = {
   async list(): Promise<ProtectionPackage[]> {
