@@ -1,22 +1,16 @@
 import { useMutation } from "@tanstack/react-query";
 
 import type { BookingConfirmation, CreateBookingInput } from "@/shared/booking";
+import { config } from "@/config";
+import { withMinLoadingTime } from "@/lib/async";
 
 import { createBookingRequest } from "./checkout.api";
-
-const MIN_SUBMIT_MS = 2000;
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const useCreateBookingMutation = (
   onSuccess?: (confirmation: BookingConfirmation) => void,
 ) =>
   useMutation<BookingConfirmation, Error, CreateBookingInput>({
-    mutationFn: async (input) => {
-      const [confirmation] = await Promise.all([
-        createBookingRequest(input),
-        wait(MIN_SUBMIT_MS),
-      ]);
-      return confirmation;
-    },
+    mutationFn: (input) =>
+      withMinLoadingTime(createBookingRequest(input), config.loading.minDelay),
     onSuccess,
   });

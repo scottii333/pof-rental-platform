@@ -77,10 +77,6 @@ const GuestBookingForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-      {/* <h1 className="text-center text-lg font-medium">
-        Login to your account and use your membership discount if you have one
-      </h1> */}
-
       <div className="flex items-center gap-3">
         <button
           type="button"

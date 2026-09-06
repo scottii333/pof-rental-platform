@@ -3,20 +3,13 @@ import {
   type BookingConfirmation,
   type CreateBookingInput,
 } from "@/shared/booking";
-import { readApiError } from "@/lib/api";
+import { apiFetch } from "@/lib/http";
 
-export const createBookingRequest = async (
+export const createBookingRequest = (
   input: CreateBookingInput,
-): Promise<BookingConfirmation> => {
-  const res = await fetch("/api/bookings", {
+): Promise<BookingConfirmation> =>
+  apiFetch("/api/bookings", bookingConfirmationSchema, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
   });
-
-  if (!res.ok) {
-    throw new Error(await readApiError(res));
-  }
-
-  return bookingConfirmationSchema.parse(await res.json());
-};
