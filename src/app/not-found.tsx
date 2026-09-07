@@ -9,7 +9,7 @@ export default function NotFound() {
         <h1 className="text-3xl font-semibold tracking-tight">
           Page not found
         </h1>
-        <p>Only /easytogo exist.</p>
+        <p>Only /easytogo exist</p>
       </div>
       <Link
         href="/easytogo"
@@ -17,7 +17,7 @@ export default function NotFound() {
           buttonVariants({ variant: "outline", size: "lg" }),
           "border border-[#8A6A38] text-[#B08747] hover:text-white",
           "bg-[linear-gradient(to_right,#8A6A38_50%,transparent_50%)] bg-size-[200%_100%] bg-right",
-          "transition-[background-position,color] duration-500 ease-out hover:bg-left"
+          "transition-[background-position,color] duration-500 ease-out hover:bg-left",
         )}
       >
         Back to Easy To Go
