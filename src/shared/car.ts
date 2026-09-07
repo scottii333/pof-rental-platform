@@ -15,7 +15,6 @@ export const carSchema = z.object({
 
 export type Car = z.infer<typeof carSchema>;
 
-/** Shape returned by `GET /api/cars`. */
 export const carsResponseSchema = z.object({
   cars: z.array(carSchema),
 });

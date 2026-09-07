@@ -21,10 +21,6 @@ import { createBookingReference } from "./reference";
 const invalid = (message: string, details?: unknown): HttpError =>
   new HttpError(HttpStatus.Unprocessable, message, details);
 
-/**
- * Validate a checkout submission, price it, persist it, and return the
- * confirmation the customer sees.
- */
 export const createBooking = async (
   raw: unknown,
 ): Promise<BookingConfirmation> => {

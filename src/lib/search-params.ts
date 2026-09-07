@@ -1,5 +1,3 @@
-/** Helpers for reading Next.js `searchParams` values in Server Components. */
-
 type ParamValue = string | string[] | undefined;
 
 /** A single string value, or `undefined` when absent or repeated. */

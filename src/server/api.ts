@@ -17,7 +17,6 @@ export function parseQuery<T extends Record<string, string>>(
   return result as T;
 }
 
-/** Parse a JSON request body, returning `{}` when there is none. */
 export async function readBody(request: Request): Promise<unknown> {
   try {
     return await request.json();
@@ -32,7 +31,6 @@ interface ApiErrorBody {
   details?: unknown;
 }
 
-/** Turn any thrown value into a consistent JSON error response. */
 export function toApiError(error: unknown): NextResponse<ApiErrorBody> {
   if (error instanceof HttpError) {
     return NextResponse.json(

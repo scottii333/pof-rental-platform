@@ -5,7 +5,6 @@ import { HttpError, HttpStatus } from "../http-error";
 import { assertDubaiBranch } from "../branch";
 import { carsStore } from "./cars.store";
 
-/** Cars available for a valid search at the Dubai branch. */
 export const searchCars = async (raw: unknown): Promise<Car[]> => {
   const parsed = searchInputSchema.safeParse(raw);
   if (!parsed.success) {

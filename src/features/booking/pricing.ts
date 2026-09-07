@@ -1,7 +1,6 @@
 import type { Addon } from "@/shared/addon";
 import { config } from "@/config";
 
-/** Default rental length used only by the demo "rolling" schedule. */
 export const RENTAL_DAYS = 7;
 
 export type PriceBreakdown = {
@@ -52,7 +51,6 @@ export const getPriceBreakdown = ({
 
 export type AddonCost = { perDay: number; oneTime: number };
 
-/** Split a list of add-ons into per-day and one-time totals. */
 export const splitAddonCost = (addons: Addon[]): AddonCost => {
   let perDay = 0;
   let oneTime = 0;
