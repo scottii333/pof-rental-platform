@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import HeroSection from "@/components/layout/hero-section";
+import HeroSkeleton from "@/components/layout/hero-skeleton";
 import CarSearchResults from "@/features/cars/components/car-search-results";
 import {
   listMileageOptions,
@@ -15,7 +16,7 @@ const EasyToGoPage = async () => {
 
   return (
     <main>
-      <Suspense>
+      <Suspense fallback={<HeroSkeleton />}>
         <HeroSection />
         <CarSearchResults
           paymentOptions={paymentOptions}

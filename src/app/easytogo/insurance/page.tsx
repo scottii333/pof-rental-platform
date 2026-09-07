@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { config } from "@/config";
 import { loadBookingContext } from "@/server/booking/booking-context";
 import InsuranceStep from "@/features/insurance/components/insurance-step";
+import StepSkeleton from "@/features/booking/components/step-skeleton";
 import { listProtectionPackages } from "@/server/insurance/insurance.service";
 
 type InsurancePageProps = {
@@ -18,7 +19,7 @@ const InsurancePage = async ({ searchParams }: InsurancePageProps) => {
 
   return (
     <main>
-      <Suspense>
+      <Suspense fallback={<StepSkeleton />}>
         <InsuranceStep
           car={context.car}
           packages={packages}

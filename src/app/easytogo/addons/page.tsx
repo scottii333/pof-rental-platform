@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { readParam } from "@/lib/search-params";
 import { loadBookingContext } from "@/server/booking/booking-context";
 import AddonsStep from "@/features/addons/components/addons-step";
+import StepSkeleton from "@/features/booking/components/step-skeleton";
 import { listAddons } from "@/server/addons/addons.service";
 import { getProtectionPackage } from "@/server/insurance/insurance.service";
 
@@ -22,7 +23,7 @@ const AddonsPage = async ({ searchParams }: AddonsPageProps) => {
 
   return (
     <main>
-      <Suspense>
+      <Suspense fallback={<StepSkeleton />}>
         <AddonsStep
           car={context.car}
           addons={addons}
